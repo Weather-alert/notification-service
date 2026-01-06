@@ -69,7 +69,7 @@ class NotificationService {
     fun readToken(userId: String): String?{
         return tokenRepository.get(userId)?.token
     }
-    fun readUsers(): List<String>{
+    fun readUsers(): List<Token>{
         return tokenRepository.listAll()
     }
     fun updateToken(userId: String, token: String): Boolean?{

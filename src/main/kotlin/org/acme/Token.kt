@@ -7,9 +7,8 @@ import jakarta.persistence.Table
 @Entity
 @Table(name = "token")
 data class Token(
-
     @Id
-    val userId: String,
+    val userId: String = "",
 
-    val token: String,
+    val token: String = "",
 )

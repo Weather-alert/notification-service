@@ -28,9 +28,7 @@ class TokenRepository {
         return true
     }
 
-    fun listAll(): List<String> =
+    fun listAll(): List<Token> =
         em.createQuery("SELECT t FROM Token t", Token::class.java).resultList
-            .map { token-> token.token }
-
 }
 
