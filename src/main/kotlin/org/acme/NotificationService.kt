@@ -7,14 +7,17 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.Message
 import com.google.firebase.messaging.Notification
 import jakarta.enterprise.context.ApplicationScoped
+import jakarta.enterprise.inject.Default
+import jakarta.inject.Inject
 import java.io.FileInputStream
 
 
 @ApplicationScoped
 class NotificationService {
-    // K: userID, V: token
-    private val tokenMap = mutableMapOf<String,String>()
-
+    
+    @Inject
+    @field:Default
+    private lateinit var tokenRepository: TokenRepository
     init {
         try {
             val serviceAccount = FileInputStream("src/main/resources/serviceAccountKey.json")
@@ -29,8 +32,8 @@ class NotificationService {
         }
     }
     fun notify(userId: String, weather: WeatherNotifyRequest): String? {
-        if(tokenMap.get(userId) == null) return null
-        val token = tokenMap[userId]
+        if(tokenRepository.get(userId) == null) return null
+        val token = tokenRepository.get(userId)!!.token
 
         val temp = ((weather.weatherForecast.main.temp - 273.15).toInt()*100).toDouble()/100
         val cityName = weather.city.name
@@ -55,30 +58,32 @@ class NotificationService {
         }
     }
     fun createToken(userId: String, token: String): Boolean?{
-        if(tokenMap.get(userId) != null) return null
+        if(tokenRepository.get(userId) != null) return null
 
-        tokenMap[userId] = token
+        val token = Token(userId,token)
+        tokenRepository.create(token)
 
         return true
     }
 
     fun readToken(userId: String): String?{
-        return tokenMap[userId]
+        return tokenRepository.get(userId)?.token
     }
     fun readUsers(): List<String>{
-        return tokenMap.keys.toList()
+        return tokenRepository.listAll()
     }
     fun updateToken(userId: String, token: String): Boolean?{
-        if(tokenMap.get(userId) == null) return null
+        if(tokenRepository.get(userId) == null) return null
 
-        tokenMap[userId] = token
+        val token = Token(userId,token)
+        tokenRepository.create(token)
 
         return true
     }
     fun removeToken(userId: String): Boolean?{
-        if (tokenMap.get(userId) == null) return null
+        if (tokenRepository.get(userId) == null) return null
 
-        tokenMap.remove(userId)
+        tokenRepository.delete(userId)
 
         return true
     }
