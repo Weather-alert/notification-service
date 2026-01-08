@@ -1,4 +1,4 @@
-package org.acme
+package org.acme.token
 
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.persistence.EntityManager

@@ -1,6 +1,5 @@
 package org.acme
 
-import com.google.firebase.messaging.FirebaseMessaging
 import jakarta.enterprise.inject.Default
 import jakarta.inject.Inject
 import jakarta.ws.rs.Consumes
@@ -10,7 +9,6 @@ import jakarta.ws.rs.PATCH
 import jakarta.ws.rs.POST
 import jakarta.ws.rs.Path
 import jakarta.ws.rs.PathParam
-import jakarta.ws.rs.Produces
 import jakarta.ws.rs.QueryParam
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response

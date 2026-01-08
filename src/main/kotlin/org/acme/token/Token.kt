@@ -1,4 +1,4 @@
-package org.acme
+package org.acme.token
 
 import jakarta.persistence.Entity
 import jakarta.persistence.Id

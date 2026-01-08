@@ -9,26 +9,37 @@ import com.google.firebase.messaging.Notification
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.enterprise.inject.Default
 import jakarta.inject.Inject
+import org.acme.token.Token
+import org.acme.token.TokenRepository
+import org.eclipse.microprofile.config.inject.ConfigProperty
 import java.io.FileInputStream
 
 
 @ApplicationScoped
 class NotificationService {
-    
+
     @Inject
     @field:Default
     private lateinit var tokenRepository: TokenRepository
-    init {
+
+    var initialized = false
+
+    @ConfigProperty(name = "service.account.path")
+    lateinit var serviceAccountPath: String
+    fun initFirebase(){
         try {
-            val serviceAccount = FileInputStream("src/main/resources/serviceAccountKey.json")
+            val serviceAccount = FileInputStream(serviceAccountPath)
 
             val options = FirebaseOptions.Builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                 .build()
 
             FirebaseApp.initializeApp(options)
+            initialized = true
         }catch(e: Exception){
             println("Failed to init Firebase key ${e.cause}")
+            println("Failed to read serviceAccountKey.json check ENV SERVICE_ACCOUNT_PATH")
+            initialized = false
         }
     }
     fun notify(userId: String, weather: WeatherNotifyRequest): String? {
@@ -49,6 +60,8 @@ class NotificationService {
             .setToken(token)
             .setNotification(notification)
             .build()
+        if(initialized== false)
+            initFirebase()
         return try {
             val response = FirebaseMessaging.getInstance().send(message)
             return response
