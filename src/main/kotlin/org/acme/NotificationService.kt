@@ -7,6 +7,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.Message
 import com.google.firebase.messaging.Notification
 import jakarta.enterprise.context.ApplicationScoped
+import jakarta.enterprise.context.RequestScoped
 import jakarta.enterprise.inject.Default
 import jakarta.inject.Inject
 import org.acme.token.Token
@@ -15,7 +16,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty
 import java.io.FileInputStream
 
 
-@ApplicationScoped
+@RequestScoped
 class NotificationService {
 
     @Inject
