@@ -1,11 +1,7 @@
 package org.acme
 
 import com.google.auth.oauth2.GoogleCredentials
-import com.google.firebase.FirebaseApp
-import com.google.firebase.FirebaseOptions
-import com.google.firebase.messaging.FirebaseMessaging
-import com.google.firebase.messaging.Message
-import com.google.firebase.messaging.Notification
+import io.vertx.mutiny.core.eventbus.Message
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.enterprise.context.RequestScoped
 import jakarta.enterprise.inject.Default
@@ -14,6 +10,8 @@ import org.acme.token.Token
 import org.acme.token.TokenRepository
 import org.eclipse.microprofile.config.inject.ConfigProperty
 import java.io.FileInputStream
+import java.io.FileNotFoundException
+import javax.management.Notification
 
 
 @RequestScoped
@@ -23,26 +21,12 @@ class NotificationService {
     @field:Default
     private lateinit var tokenRepository: TokenRepository
 
-    var initialized = false
+    //@Inject
+    //private lateinit var firebaseMessaging: FirebaseMessaging
 
-    @ConfigProperty(name = "service.account.path")
-    lateinit var serviceAccountPath: String
-    fun initFirebase(){
-        try {
-            val serviceAccount = FileInputStream(serviceAccountPath)
+    @Inject
+    private lateinit var nativePushService: NativePushService
 
-            val options = FirebaseOptions.Builder()
-                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                .build()
-
-            FirebaseApp.initializeApp(options)
-            initialized = true
-        }catch(e: Exception){
-            println("Failed to init Firebase key ${e.cause}")
-            println("Failed to read serviceAccountKey.json check ENV SERVICE_ACCOUNT_PATH")
-            initialized = false
-        }
-    }
     fun notify(userId: String, weather: WeatherNotifyRequest): String? {
         if(tokenRepository.get(userId) == null) return null
         val token = tokenRepository.get(userId)!!.token
@@ -52,23 +36,24 @@ class NotificationService {
         val title = "$temp°C in $cityName"
         val body = "${weather.weatherForecast.weather.first().description}"
 
+        /*
         val notification : Notification = Notification.builder()
             .setBody(body)
             .setTitle(title)
             .build()
-
         val message = Message.builder()
             .setToken(token)
             .setNotification(notification)
             .build()
-        if(initialized== false)
-            initFirebase()
+        */
+
+            //val response = firebaseMessaging.getInstance().send(message)
+            //return response
         return try {
-            val response = FirebaseMessaging.getInstance().send(message)
-            return response
+            nativePushService.sendPush(token, title,body).toString()
         } catch(e: Exception){
             println("couldn't' send message to Firebase $token")
-            ""
+            null
         }
     }
     fun createToken(userId: String, token: String): Boolean?{
